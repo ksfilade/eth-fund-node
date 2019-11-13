@@ -1,12 +1,24 @@
 const express = require('express')
 const auth = require('../middleware/auth')
 const router = new express.Router()
-const User = require('../models/fundriser')
+const Fundriser = require('../models/fundriser')
 
-
-router.post('/fundrisers', async(req, res) => {
-    let fundriser = new User(req.body)
-    console.log(fundriser);
+const multer = require('multer')
+const upload = multer({
+    limits: {
+        fileSize: 1000000
+    },
+    // fileFilter(req, file, cb){
+    //     if (!file.originalname.endsWith('.png')) {
+    //        return cb(new Error('Please upload a png')) 
+    //     }
+    //     cb(undefined, true)
+    // }
+})
+router.post('/fundrisers', upload.single('upload'), async(req, res) => {
+    
+    let fundriser = new Fundriser(req.body)
+    fundriser.thumbnail = req.file.buffer
     fundriser.save().then( async () => {
         // const token = await fundriser.generateAuthToken()
         res.send({ fundriser })
@@ -14,6 +26,23 @@ router.post('/fundrisers', async(req, res) => {
         res.send(error);
     })
     
+})
+router.get('/fundrisers', async(req, res) => {
+    Fundriser.find().limit( parseInt( req.query.limit )).skip(parseInt( req.query.skip )).then(results =>{
+        res.send({ results })
+    }).catch((err) =>{
+        res.send(err);
+    })
+})
+router.get('/fundrisers/image/:id', async(req, res) => {
+   try{
+        const fundriser = await Fundriser.findById(req.params.id)
+
+        res.set('Content-Type', 'image/png')
+        res.send(fundriser.thumbnail)
+    }catch{
+        res.send('error')
+    }
 })
 // router.post('/users/login' ,async(req, res) => {
 //     try{

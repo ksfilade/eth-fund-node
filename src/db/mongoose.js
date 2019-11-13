@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const connectionURL = 'mongodb://127.0.0.1:27017/test'
+const connectionURL = process.env.MONGODB_URL
 const databseName = 'test'
 
 mongoose.connect(connectionURL, { useNewUrlParser: true,useCreateIndex: true  })

@@ -15,6 +15,9 @@ const fundriserSchema = new mongoose.Schema({
     },
     goalMoney:{
         type: Number
+    },
+    thumbnail:{
+        type: Buffer
     }
 })
 // userSchema.statics.findByCredentials = async (email, password)=>{
@@ -36,15 +39,16 @@ const fundriserSchema = new mongoose.Schema({
 
 //     return token;
 // }
-// userSchema.methods.toJSON = function () {
-//     const user = this
-//     const userObject = user.toObject()
+fundriserSchema.methods.toJSON = function () {
+    const fundriser = this
+    const fundriserObject = fundriser.toObject()
+    if (fundriserObject.thumbnail) {
+        fundriserObject.image = '/fundrisers/image/'+fundriser.id;
+    }
+    delete fundriserObject.thumbnail;
 
-//     delete userObject.password;
-//     delete userObject.tokens
-
-//     return userObject
-// }
+    return fundriserObject
+}
 fundriserSchema.pre('save', async function(next){
     const user = this;
     next()
