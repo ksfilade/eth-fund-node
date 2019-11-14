@@ -1,5 +1,7 @@
 const express = require('express')
 require('./db/mongoose')
+var cors = require('cors')
+
 const userRouter = require('./routers/users')
 const fundriserRouter = require('./routers/fundrisers')
 const app = express();
