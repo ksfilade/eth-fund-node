@@ -22,13 +22,13 @@ router.post('/users', async(req, res) => {
     
 })
 router.post('/users/login' ,async(req, res) => {
-        console.log(req.body);
+    try{
         const user = await User.findByCredentials(req.body.email, req.body.password)
-        console.log('object');
-        console.log(user);
-        const token = await user.generateAuthToken()
-
+        const token = await user.generateAuthToken()z
         res.send({ user, token })
+    }catch (e){
+        res.send({success:false})
+    }
 })
 router.post('/users/logout',auth ,async(req, res) => {
     try{
