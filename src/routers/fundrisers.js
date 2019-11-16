@@ -18,7 +18,7 @@ const upload = multer({
 router.post('/fundrisers', upload.single('upload'), async(req, res) => {
     
     let fundriser = new Fundriser(req.body)
-    fundriser.thumbnail = req.file.buffer
+    // fundriser.thumbnail = req.file.buffer
     fundriser.save().then( async () => {
         // const token = await fundriser.generateAuthToken()
         res.send({ fundriser })
