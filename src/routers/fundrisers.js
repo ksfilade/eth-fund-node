@@ -6,19 +6,25 @@ const Fundriser = require('../models/fundriser')
 const multer = require('multer')
 const upload = multer({
     limits: {
-        fileSize: 1000000
+        fileSize: 10000000
     },
     // fileFilter(req, file, cb){
+    //     console.log('object filter');
     //     if (!file.originalname.endsWith('.png')) {
     //        return cb(new Error('Please upload a png')) 
     //     }
     //     cb(undefined, true)
     // }
+
 })
 router.post('/fundrisers', upload.single('upload'), async(req, res) => {
-    
+    console.log('object');
     let fundriser = new Fundriser(req.body)
-    // fundriser.thumbnail = req.file.buffer
+    console.log(req.file);
+    if (req.file) 
+        fundriser.thumbnail = req.file.buffer
+    
+   
     fundriser.save().then( async () => {
         // const token = await fundriser.generateAuthToken()
         res.send({ fundriser })
