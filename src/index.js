@@ -6,7 +6,7 @@ var cors = require('cors')
 const http = require('http')
 const userRouter = require('./routers/users')
 const fundriserRouter = require('./routers/fundrisers')
-require('./routers/web3/ropstenConnect')
+contract = require('./routers/web3/ropstenConnect')
 const app = express();
 
 const server = http.createServer(app)
@@ -25,7 +25,17 @@ app.use(fundriserRouter)
 //     console.log(req.method, req.path)
 //     next()
 // })
+
+
 io.on('connection',(socket) =>{
+    contract.events.Deposit({
+        // filter: {myIndexedParam: [20,23]},
+        fromBlock: 'latest',
+        toBlock: 'latest'
+    }).on('data', function(event) {
+        console.log(event.returnValues);
+        socket.emit('countupdatednetwork', event.returnValues)
+    }).on('error', console.error);
     console.log('connected');
     socket.emit('countupdated')
 })
