@@ -18,7 +18,10 @@ const fundriserSchema = new mongoose.Schema({
     },
     thumbnail:{
         type: Buffer
-    }
+    },
+    walletAddress:{
+        type: String
+    },
 })
 // userSchema.statics.findByCredentials = async (email, password)=>{
 //     const user =await User.findOne({ email })
