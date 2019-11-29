@@ -36,6 +36,14 @@ router.get('/fundrisers', async(req, res) => {
         res.send(err);
     })
 })
+router.get('/fundrisers/:id', async(req, res) => {
+    console.log(req.params.id);
+    Fundriser.find( {_id:req.params.id} ).then(result =>{
+        res.send( result )
+    }).catch((err) =>{
+        res.send(err);
+    })
+})
 router.get('/fundrisers/image/:id', async(req, res) => {
    try{
         const fundriser = await Fundriser.findById(req.params.id)
