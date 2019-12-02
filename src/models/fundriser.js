@@ -22,6 +22,15 @@ const fundriserSchema = new mongoose.Schema({
     walletAddress:{
         type: String
     },
+    category:{
+        type: String
+    },
+    dateCreated:{
+        type: Date
+    },
+    organaizer:{
+        type: String
+    }
 })
 // userSchema.statics.findByCredentials = async (email, password)=>{
 //     const user =await User.findOne({ email })

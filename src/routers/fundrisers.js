@@ -2,6 +2,7 @@ const express = require('express')
 const auth = require('../middleware/auth')
 const router = new express.Router()
 const Fundriser = require('../models/fundriser')
+const Donation = require('../models/donations')
 
 const multer = require('multer')
 const upload = multer({
@@ -17,8 +18,9 @@ const upload = multer({
     // }
 
 })
-router.post('/fundrisers', upload.single('upload'), async(req, res) => {
+router.post('/fundrisers',auth, upload.single('upload'), async(req, res) => {
     let fundriser = new Fundriser(req.body)
+    fundriser.dateCreated = (new Date()).toLocaleDateString();
     if (req.file) 
         fundriser.thumbnail = req.file.buffer
     fundriser.save().then( async () => {
@@ -29,15 +31,25 @@ router.post('/fundrisers', upload.single('upload'), async(req, res) => {
     })
     
 })
+router.post('/fundrisers/donation', async(req, res) => {
+    let donation = new Donation(req.body)
+    donation.dateDonated = (new Date()).toLocaleDateString()
+    donation.save().then( async () => {
+        // const token = await fundriser.generateAuthToken()
+        res.send({ donation })
+    }).catch((error) =>{
+        res.send(error);
+    })
+    
+})
 router.get('/fundrisers', async(req, res) => {
-    Fundriser.find().limit( parseInt( req.query.limit )).skip(parseInt( req.query.skip )).then(results =>{
+    Fundriser.find().limit( parseInt( req.query.limit )).sort({_id: -1}).skip(parseInt( req.query.skip )).then(results =>{
         res.send({ results })
     }).catch((err) =>{
         res.send(err);
     })
 })
 router.get('/fundrisers/:id', async(req, res) => {
-    console.log(req.params.id);
     Fundriser.find( {_id:req.params.id} ).then(result =>{
         res.send( result )
     }).catch((err) =>{
