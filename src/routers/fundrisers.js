@@ -18,58 +18,65 @@ const upload = multer({
     // }
 
 })
-router.post('/fundrisers',auth, upload.single('upload'), async(req, res) => {
+router.post('/fundrisers', auth, upload.single('upload'), async (req, res) => {
     let fundriser = new Fundriser(req.body)
     fundriser.dateCreated = (new Date()).toLocaleDateString();
-    if (req.file) 
+    if (req.file)
         fundriser.thumbnail = req.file.buffer
-    fundriser.save().then( async () => {
+    fundriser.save().then(async () => {
         // const token = await fundriser.generateAuthToken()
         res.send({ fundriser })
-    }).catch((error) =>{
+    }).catch((error) => {
         res.send(error);
     })
-    
+
 })
-router.post('/fundrisers/donation', async(req, res) => {
+router.post('/fundrisers/donation', async (req, res) => {
     let donation = new Donation(req.body)
     donation.dateDonated = (new Date()).toLocaleDateString()
-    donation.save().then( async () => {
+    donation.save().then(async () => {
         // const token = await fundriser.generateAuthToken()
         res.send({ donation })
-    }).catch((error) =>{
+    }).catch((error) => {
         res.send(error);
     })
-    
+
 })
-router.get('/fundrisers', async(req, res) => {
-    Fundriser.find().limit( parseInt( req.query.limit )).sort({_id: -1}).skip(parseInt( req.query.skip )).then(results =>{
-        res.send({ results })
-    }).catch((err) =>{
+router.get('/fundrisers', async (req, res) => {
+    Fundriser
+        .find(req.query.category ? { category: req.query.category } : void 0)
+        .find(req.query.keyword ? { $text: { $search: 'polution' } } : void 0)
+        .limit(parseInt(req.query.limit))
+        .sort({ _id: -1 })
+        .skip(parseInt(req.query.skip))
+        .then(
+            results => {
+                res.send({ results })
+            }).catch((err) => {
+                res.send(err);
+            })
+})
+router.get('/fundrisers/:id', async (req, res) => {
+    Fundriser.find({ _id: req.params.id }).then(result => {
+        res.send(result)
+    }).catch((err) => {
         res.send(err);
     })
 })
-router.get('/fundrisers/:id', async(req, res) => {
-    Fundriser.find( {_id:req.params.id} ).then(result =>{
-        res.send( result )
-    }).catch((err) =>{
+router.get('/fundrisers/donations/:id', async (req, res) => {
+    Donation.find({ donationTo: req.params.id }).then(result => {
+        res.send(result)
+    }).catch((err) => {
         res.send(err);
     })
 })
-router.get('/fundrisers/donations/:id', async(req, res) => {
-    Donation.find( {donationTo:req.params.id} ).then(result =>{
-        res.send( result )
-    }).catch((err) =>{
-        res.send(err);
-    })
-})
-router.get('/fundrisers/image/:id', async(req, res) => {
-   try{
+router.get('/fundrisers/image/:id', async (req, res) => {
+    try {
         const fundriser = await Fundriser.findById(req.params.id)
 
         res.set('Content-Type', 'image/png')
         res.send(fundriser.thumbnail)
-    }catch{
+    } catch{
         res.send('error')
     }
 })

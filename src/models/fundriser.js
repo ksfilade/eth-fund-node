@@ -28,7 +28,7 @@ const fundriserSchema = new mongoose.Schema({
     dateCreated:{
         type: Date
     },
-    organaizer:{
+    organaiser:{
         type: String
     }
 })
@@ -51,6 +51,7 @@ const fundriserSchema = new mongoose.Schema({
 
 //     return token;
 // }
+fundriserSchema.index( {title: 'text'} )
 fundriserSchema.methods.toJSON = function () {
     const fundriser = this
     const fundriserObject = fundriser.toObject()
