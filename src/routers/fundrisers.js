@@ -43,18 +43,13 @@ router.post('/fundrisers/donation', async (req, res) => {
 
 })
 router.get('/fundrisers', async (req, res) => {
-    console.log(req.query.category.toString());
-    Fundriser
-        .find( { category: req.query.category.toString() } )
+    let results = await Fundriser
+        .find(req.query.category ? { category: req.query.category } : void 0)
+        .find(req.query.keyword ? { $text: { $search: 'polution' } } : void 0)
         .limit(parseInt(req.query.limit))
         .sort({ _id: -1 })
         .skip(parseInt(req.query.skip))
-        .then(
-            results => {
-                res.send({ results })
-            }).catch((err) => {
-                res.send(err);
-            })
+        res.send(results);
 })
 router.get('/fundrisers/:id', async (req, res) => {
     Fundriser.find({ _id: req.params.id }).then(result => {
