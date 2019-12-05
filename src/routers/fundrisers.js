@@ -46,7 +46,6 @@ router.get('/fundrisers', async (req, res) => {
     console.log(req.query);
     Fundriser
         .find( { category: req.query.category } )
-        .find(req.query.keyword ? { $text: { $search: req.query.keyword } } : void 0)
         .limit(parseInt(req.query.limit))
         .sort({ _id: -1 })
         .skip(parseInt(req.query.skip))
