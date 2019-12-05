@@ -45,7 +45,7 @@ router.post('/fundrisers/donation', async (req, res) => {
 router.get('/fundrisers', async (req, res) => {
     Fundriser
         .find(req.query.category ? { category: req.query.category } : void 0)
-        .find(req.query.keyword ? { $text: { $search: 'polution' } } : void 0)
+        .find(req.query.keyword ? { $text: { $search: req.query.keyword } } : void 0)
         .limit(parseInt(req.query.limit))
         .sort({ _id: -1 })
         .skip(parseInt(req.query.skip))
