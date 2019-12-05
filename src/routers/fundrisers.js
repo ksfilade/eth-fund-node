@@ -43,9 +43,9 @@ router.post('/fundrisers/donation', async (req, res) => {
 
 })
 router.get('/fundrisers', async (req, res) => {
-    console.log(req.query);
+    console.log(req.query.category.toString());
     Fundriser
-        .find( { category: req.query.category } )
+        .find( { category: req.query.category.toString() } )
         .limit(parseInt(req.query.limit))
         .sort({ _id: -1 })
         .skip(parseInt(req.query.skip))
