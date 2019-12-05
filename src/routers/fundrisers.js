@@ -43,7 +43,7 @@ router.post('/fundrisers/donation', async (req, res) => {
 
 })
 router.get('/fundrisers', async (req, res) => {
-    let results = await Fundriser.find(req.query.category ? { category: req.query.category } : void 0).exec(function(err,result){
+    let results = await Fundriser.find( { category: req.query.category } ).exec(function(err,result){
         if(!err){
             res.send(result)
         console.log(result);
