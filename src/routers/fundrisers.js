@@ -43,6 +43,7 @@ router.post('/fundrisers/donation', async (req, res) => {
 
 })
 router.get('/fundrisers', async (req, res) => {
+    console.log(req.query);
     Fundriser
         .find(req.query.category ? { category: req.query.category } : void 0)
         .find(req.query.keyword ? { $text: { $search: req.query.keyword } } : void 0)
