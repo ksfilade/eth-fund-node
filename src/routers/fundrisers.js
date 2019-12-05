@@ -66,6 +66,13 @@ router.get('/fundrisers/donations/:id', async (req, res) => {
         res.send(err);
     })
 })
+router.delete('/fundrisers/:id', async (req, res) => {
+    Fundriser.deleteOne({ _id: req.params.id }).then(() => {
+        res.send({success: true})
+    }).catch((err) => {
+        res.send(err);
+    })
+})
 router.get('/fundrisers/image/:id', async (req, res) => {
     try {
         const fundriser = await Fundriser.findById(req.params.id)
