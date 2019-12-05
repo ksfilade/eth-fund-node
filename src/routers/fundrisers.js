@@ -49,7 +49,9 @@ router.get('/fundrisers', async (req, res) => {
         .limit(parseInt(req.query.limit))
         .sort({ _id: -1 })
         .skip(parseInt(req.query.skip))
+        console.log(results);
         res.send({results});
+    
 })
 router.get('/fundrisers/:id', async (req, res) => {
     Fundriser.find({ _id: req.params.id }).then(result => {

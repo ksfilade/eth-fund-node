@@ -23,7 +23,8 @@ const fundriserSchema = new mongoose.Schema({
         type: String
     },
     category:{
-        type: String
+        type: String,
+        trim: true
     },
     dateCreated:{
         type: Date
