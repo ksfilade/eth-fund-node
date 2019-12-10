@@ -20,7 +20,11 @@ const userSchema = new mongoose.Schema({
         token: {
             type: String
         }
-    }]
+    }],
+    admin:{
+        type: Boolean,
+        default: false
+    }
 })
 userSchema.statics.findByCredentials = async (email, password)=>{
     const user =await User.findOne({ email })

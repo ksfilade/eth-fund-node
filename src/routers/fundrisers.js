@@ -1,5 +1,7 @@
 const express = require('express')
 const auth = require('../middleware/auth')
+const adminAuth = require('../middleware/adminAuth')
+
 const router = new express.Router()
 const Fundriser = require('../models/fundriser')
 const Donation = require('../models/donations')
@@ -44,16 +46,24 @@ router.post('/fundrisers/donation', async (req, res) => {
 })
 router.get('/fundrisers', async (req, res) => {
     let results = await Fundriser
+        .find(req.query.featured ? { featured: req.query.featured } : void 0)
         .find(req.query.category ? { category: req.query.category } : void 0)
         .find(req.query.keyword ? { $text: { $search: req.query.keyword } } : void 0)
         .limit(parseInt(req.query.limit))
         .sort({ _id: -1 })
         .skip(parseInt(req.query.skip))
-        res.send({results});
-    
+    res.send({ results });
+
 })
 router.get('/fundrisers/:id', async (req, res) => {
     Fundriser.find({ _id: req.params.id }).then(result => {
+        res.send(result)
+    }).catch((err) => {
+        res.send(err);
+    })
+})
+router.put('/fundrisers/:id', adminAuth, async (req, res) => {
+    Fundriser.updateOne({ _id: req.params.id }, {$set: {featured: req.body.featured}}).then(result => {
         res.send(result)
     }).catch((err) => {
         res.send(err);
@@ -66,9 +76,9 @@ router.get('/fundrisers/donations/:id', async (req, res) => {
         res.send(err);
     })
 })
-router.delete('/fundrisers/:id', async (req, res) => {
+router.delete('/fundrisers/:id', adminAuth, async (req, res) => {
     Fundriser.deleteOne({ _id: req.params.id }).then(() => {
-        res.send({success: true})
+        res.send({ success: true })
     }).catch((err) => {
         res.send(err);
     })

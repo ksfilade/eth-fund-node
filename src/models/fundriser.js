@@ -31,6 +31,10 @@ const fundriserSchema = new mongoose.Schema({
     },
     organaiser:{
         type: String
+    },
+    featured:{
+        type: Boolean,
+        default: false
     }
 })
 // userSchema.statics.findByCredentials = async (email, password)=>{
