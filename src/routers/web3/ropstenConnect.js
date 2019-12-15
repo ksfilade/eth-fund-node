@@ -17,8 +17,8 @@ provider.on('end', e => {
     });
     web3.setProvider(provider);
 });
-const abi = [{"constant":false,"inputs":[{"name":"fundAddress","type":"address"}],"name":"send","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[],"name":"message","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"initialMessage","type":"string"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_from","type":"address"},{"indexed":false,"name":"_value","type":"uint256"},{"indexed":true,"name":"_to","type":"address"}],"name":"Deposit","type":"event"}]
-var myContract = new web3.eth.Contract(abi, '0xB665C09C7CD243Cb82049e03B91CA0656D96530f');
+const abi =  [{"constant":true,"inputs":[],"name":"message","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"fundAddress","type":"address"},{"name":"fromId","type":"string"},{"name":"toId","type":"string"}],"name":"send","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"inputs":[{"name":"initialMessage","type":"string"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_from","type":"address"},{"indexed":false,"name":"_value","type":"uint256"},{"indexed":true,"name":"_to","type":"address"},{"indexed":false,"name":"fromId","type":"string"},{"indexed":false,"name":"toId","type":"string"}],"name":"Deposit","type":"event"}]
+var myContract = new web3.eth.Contract(abi, '0xDAD225222C3D87d608e86BA73F92b919F57e0ED9');
 myContract.events.Deposit({
     // filter: {myIndexedParam: [20,23]},
     fromBlock: 0,
