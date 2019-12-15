@@ -19,11 +19,11 @@ provider.on('end', e => {
 });
 const abi = [{"constant":false,"inputs":[{"name":"fundAddress","type":"address"}],"name":"send","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[],"name":"message","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"initialMessage","type":"string"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_from","type":"address"},{"indexed":false,"name":"_value","type":"uint256"},{"indexed":true,"name":"_to","type":"address"}],"name":"Deposit","type":"event"}]
 var myContract = new web3.eth.Contract(abi, '0xB665C09C7CD243Cb82049e03B91CA0656D96530f');
-// myContract.events.Deposit({
-//     // filter: {myIndexedParam: [20,23]},
-//     fromBlock: 0,
-//     toBlock: 'latest'
-// }).on('data', function(event) {
-//     console.log(event.returnValues);
-// }).on('error', console.error);
+myContract.events.Deposit({
+    // filter: {myIndexedParam: [20,23]},
+    fromBlock: 0,
+    toBlock: 'latest'
+}).on('data', function(event) {
+    console.log(event.returnValues);
+}).on('error', console.error);
 module.exports = myContract
