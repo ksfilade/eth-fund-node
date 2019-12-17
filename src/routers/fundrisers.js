@@ -67,8 +67,7 @@ router.get('/fundrisers/:id', async (req, res) => {
         res.send(err);
     })
 })
-router.put('/fundrisers/:id', async (req, res) => {
-    var query = { title: 'bojan' }
+router.put('/fundrisers/edit/:id',userAuth, async (req, res) => {
     Fundriser.updateOne(
         {
             _id: req.params.id
