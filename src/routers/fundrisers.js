@@ -70,7 +70,7 @@ router.get('/fundrisers/:id', async (req, res) => {
 router.put('/fundrisers/user/:id/edit/:fund_id',userAuth, async (req, res) => {
     Fundriser.updateOne(
         {
-            _id: req.params.id
+            _id: req.params.fund_id
         },
         {
             $set: req.body
