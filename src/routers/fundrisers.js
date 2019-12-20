@@ -89,8 +89,15 @@ router.put('/fundrisers/:id', adminAuth, async (req, res) => {
     })
 })
 router.get('/fundrisers/donations/:id', async (req, res) => {
+    let sum = 0;
+    Donation.aggregate([{ $match: {
+    } },
+    { $group: { _id : req.params.id, sum : { $sum: "$amount" } } }]).then((res) =>{
+        sum ={sum: res.sum}
+    });
+  
     Donation.find({ donationTo: req.params.id }).then(result => {
-        res.send(result)
+        res.send({result,sum})
     }).catch((err) => {
         res.send(err);
     })

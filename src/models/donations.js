@@ -12,6 +12,12 @@ const donationSchema = new mongoose.Schema({
     },
     dateDonated:{
         type: Date
+    },
+    fromId:{
+        type: String
+    },
+    toId:{
+        type: String
     }
 })
 // userSchema.statics.findByCredentials = async (email, password)=>{

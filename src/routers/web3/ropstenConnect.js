@@ -3,7 +3,7 @@ var Web3 = require('web3');
 var ROPSTEN_WSS = 'wss://ropsten.infura.io/ws';
 var provider = new Web3.providers.WebsocketProvider(ROPSTEN_WSS);
 var web3 = new Web3(provider);
-
+var Donation = require('../../models/donations')
 provider.on('error', e => {
     console.error('WS Infura Error', e);
 });
@@ -25,5 +25,24 @@ myContract.events.Deposit({
     toBlock: 'latest'
 }).on('data', function(event) {
     console.log(event.returnValues);
+
+    let donation = new Donation();
+    donation.donationFrom = event.returnValues._from
+    donation.donationTo = event.returnValues._to
+    const BN = web3.utils.BN
+    // web3.utils.fromWei(new BN(await web3.eth.getBalance(walletAddress)).toString())
+    donation.amount = web3.utils.fromWei(new BN( event.returnValues._value ))
+    donation.fromId = event.returnValues.fromId
+    donation.toId = event.returnValues.toId
+
+    console.log('==============');
+    console.log(donation);
+    donation.save().then(async () => {
+        // const token = await fundriser.generateAuthToken()
+        // res.send({ fundriser })
+        console.log('successfull saved');
+        }).catch((error) => {
+        console.log(error);
+    })
 }).on('error', console.error);
 module.exports = myContract
