@@ -51,6 +51,16 @@ router.get('/fundrisers', async (req, res) => {
         .limit(parseInt(req.query.limit))
         .sort({ _id: -1 })
         .skip(parseInt(req.query.skip))
+
+        results.forEach(async(el,index,arr) =>{
+           await  Donation.aggregate([
+                { $match: { donationTo: el._id } },
+                { $group: { _id : el._id, sum : { $sum: "$amount" } } }])
+                .then((res)=>{
+                    console.log(res);
+                    arr[index].sum = res[0].sum;
+            });
+        })
     res.send({ results });
 
 })

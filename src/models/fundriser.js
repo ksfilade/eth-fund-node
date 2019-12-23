@@ -40,6 +40,9 @@ const fundriserSchema = new mongoose.Schema({
     featured:{
         type: Boolean,
         default: false
+    },
+    sum:{
+        type: Number
     }
 })
 // userSchema.statics.findByCredentials = async (email, password)=>{
