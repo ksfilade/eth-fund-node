@@ -53,6 +53,7 @@ router.get('/fundrisers', async (req, res) => {
         .skip(parseInt(req.query.skip))
 
         results.forEach(async(el,index,arr) =>{
+            console.log(el);
            await  Donation.aggregate([
                 { $match: { donationTo: el._id } },
                 { $group: { _id : el._id, sum : { $sum: "$amount" } } }])
@@ -100,14 +101,14 @@ router.put('/fundrisers/:id', adminAuth, async (req, res) => {
 })
 router.get('/fundrisers/donations/:id', async (req, res) => {
     let sum = 0;
-    Donation.aggregate([
+    await Donation.aggregate([
         { $match: { donationTo: req.params.id } },
         { $group: { _id : req.params.id, sum : { $sum: "$amount" } } }])
         .then((res)=>{
             console.log(res);
             sum = res[0].sum;
     });
-    Donation.find({ donationTo: req.params.id }).then(result => {
+    await Donation.find({ donationTo: req.params.id }).then(result => {
         res.send({result,sum})
     }).catch((err) => {
         res.send(err);
