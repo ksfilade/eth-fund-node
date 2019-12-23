@@ -94,6 +94,7 @@ router.get('/fundrisers/donations/:id', async (req, res) => {
         { $match: { donationTo: req.params.id } },
         { $group: { _id : req.params.id, sum : { $sum: "$amount" } } }])
         .then((res)=>{
+            console.log(res);
             sum = res[0].sum;
     });
     Donation.find({ donationTo: req.params.id }).then(result => {
