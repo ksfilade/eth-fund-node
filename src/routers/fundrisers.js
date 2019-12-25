@@ -58,12 +58,13 @@ router.get('/fundrisers', async (req, res) => {
                 { $match: { donationTo: el._id } },
                 { $group: { _id : el._id, sum : { $sum: "$amount" } } }])
                 .then((res)=>{
-                    console.log(res);
-
-                    arr[index] = { item:el, balance: res[0].sum }
+                    console.log(el);
+                    console.log(arr[index]);
+                    arr[index].sum = res[0].sum;
+                    console.log(arr[index]);
             });
         })
-    console.log(results);
+        console.log(results);
     res.send({ results });
 
 })
