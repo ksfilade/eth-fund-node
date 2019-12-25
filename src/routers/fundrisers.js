@@ -60,7 +60,7 @@ router.get('/fundrisers', async (req, res) => {
                 { $group: { _id : el._id.toString(), sum : { $sum: "$amount" } } }])
                 .then((res)=>{
                     console.log(res);
-                    arr[index].sum = res[0].sum;
+                    arr[index] = { data:arr[index], balance:res[0].sum};
             });
         })
     res.send({ results });
