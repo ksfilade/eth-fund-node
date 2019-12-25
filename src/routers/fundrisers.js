@@ -51,17 +51,16 @@ router.get('/fundrisers', async (req, res) => {
         .limit(parseInt(req.query.limit))
         .sort({ _id: -1 })
         .skip(parseInt(req.query.skip))
-        Fundriser.aggregate([
-            { $lookup:
-                {
-                   from: "donations",
-                   localField: "_id",
-                   foreignField: "donationTo",
-                   as: "donations"
-                }
-            }
-        ]).then((res) => {
-            console.log(res);
+
+        results.forEach(async(el,index,arr) =>{
+            console.log(el);
+           await  Donation.aggregate([
+                { $match: { donationTo: el._id } },
+                { $group: { _id : el._id, sum : { $sum: "$amount" } } }])
+                .then((res)=>{
+                    console.log(res);
+                    arr[index].sum = res[0].sum;
+            });
         })
     res.send({ results });
 
@@ -103,7 +102,7 @@ router.put('/fundrisers/:id', adminAuth, async (req, res) => {
 router.get('/fundrisers/donations/:id', async (req, res) => {
     let sum = 0;
     await Donation.aggregate([
-        { $match: { toId: req.params.id } },
+        { $match: { donationTo: req.params.id } },
         { $group: { _id : req.params.id, sum : { $sum: "$amount" } } }])
         .then((res)=>{
             console.log(res);
