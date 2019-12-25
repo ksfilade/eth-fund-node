@@ -51,7 +51,18 @@ router.get('/fundrisers', async (req, res) => {
         .limit(parseInt(req.query.limit))
         .sort({ _id: -1 })
         .skip(parseInt(req.query.skip))
-
+        Fundriser.aggregate([
+            { $lookup:
+                {
+                   from: "donations",
+                   localField: "_id",
+                   foreignField: "donationTo",
+                   as: "donations"
+                }
+            }
+        ]).then((res) => {
+            console.log(res);
+        })
     res.send({ results });
 
 })
