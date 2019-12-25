@@ -55,7 +55,7 @@ router.get('/fundrisers', async (req, res) => {
         results.forEach(async(el,index,arr) =>{
             console.log('object asda sdasd asd asd ');
             console.log(el._id);
-            await Donation.aggregate([
+            Donation.aggregate([
                 { $match: { donationTo: el._id } },
                 { $group: { _id : el._id, sum : { $sum: "$amount" } } }])
                 .then((res)=>{
