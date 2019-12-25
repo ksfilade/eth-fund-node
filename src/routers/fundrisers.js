@@ -60,6 +60,7 @@ router.get('/fundrisers', async (req, res) => {
                 .then((res)=>{
                     console.log(el);
                     console.log(arr[index]);
+                    console.log(res);
                     arr[index].sum = res[0].sum;
                     console.log(arr[index]);
             });
