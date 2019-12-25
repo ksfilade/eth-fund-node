@@ -56,11 +56,11 @@ router.get('/fundrisers', async (req, res) => {
             console.log('objec 1asdt');
             console.log(el._id);
            await  Donation.aggregate([
-                { $match: { donationTo: '5df752ff015b3e001714600f' } },
-                { $group: { _id : '5df752ff015b3e001714600f', sum : { $sum: "$amount" } } }])
+                { $match: { donationTo: el._id.toString() } },
+                { $group: { _id : el._id.toString(), sum : { $sum: "$amount" } } }])
                 .then((res)=>{
                     console.log(res);
-                    arr[index].sum = res[0].sum;
+                    // arr[index].sum = res[0].sum;
             });
         })
     res.send({ results });
