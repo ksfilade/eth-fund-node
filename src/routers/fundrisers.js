@@ -61,8 +61,6 @@ router.get('/fundrisers', async (req, res) => {
             });
             finalRes.push( { data:arr[index], balance: balance } )
             console.log(finalRes.balance);
-        }).then(() =>{
-            res.send({ finalRes });
         })
         console.log('object');
     res.send({ finalRes });
