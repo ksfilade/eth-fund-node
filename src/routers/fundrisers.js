@@ -52,34 +52,31 @@ router.get('/fundrisers', async (req, res) => {
         .sort({ _id: -1 })
         .skip(parseInt(req.query.skip))
 
-        results.forEach(async(el,index,arr) =>{
-           await  Donation.aggregate([
-                { $match: { donationTo: el._id.toString() } },
-                { $group: { _id : el._id.toString(), sum : { $sum: "$amount" } } }])
-                .then((res)=>{
-                    console.log(res);
-                    arr[index] = { data:arr[index], balance:res[0].sum};
-            });
-        })
-    let promise = async function(){
-        console.log(results);
-        results.forEach(async(el,index,arr) =>{
-            await  Donation.aggregate([
-                 { $match: { donationTo: el._id.toString() } },
-                 { $group: { _id : el._id.toString(), sum : { $sum: "$amount" } } }])
-                 .then((res)=>{
-                     console.log(res);
-                     arr[index] = { data:arr[index], balance:res[0].sum};
-                     console.log(arr[index].balance);
-             });
-         })
+    // results.forEach(async(el,index,arr) =>{
+    //    await  Donation.aggregate([
+    //         { $match: { donationTo: el._id.toString() } },
+    //         { $group: { _id : el._id.toString(), sum : { $sum: "$amount" } } }])
+    //         .then((res)=>{
+    //             console.log(res);
+    //             arr[index] = { data:arr[index], balance:res[0].sum};
+    //     });
+    // })
+    let promise = async function (el) {
+       
+        let res = await Donation.aggregate([
+            { $match: { donationTo: el._id.toString() } },
+            { $group: { _id: el.toString(), sum: { $sum: "$amount" } } }])
+        console.log(res);
+        return {data:el,balance:res[0].sum};
+        }
+    for(let i = 0;i < results.length;i++){
+        results[i] = await promise(results[i])
+        console.log(results[i]);
     }
-    promise().then(()=>{
-        res.send({ results });
-    })
-    // console.log(await results());
-    // console.log('object');
-    // res.send({ results });
+    
+    
+    console.log('object');
+    res.send({ results });
 
 })
 router.get('/fundrisers/user/:id', userAuth, async (req, res) => {
@@ -95,7 +92,7 @@ router.get('/fundrisers/:id', async (req, res) => {
         res.send(err);
     })
 })
-router.put('/fundrisers/user/:id/edit/:fund_id',userAuth, async (req, res) => {
+router.put('/fundrisers/user/:id/edit/:fund_id', userAuth, async (req, res) => {
     Fundriser.updateOne(
         {
             _id: req.params.fund_id
@@ -120,13 +117,13 @@ router.get('/fundrisers/donations/:id', async (req, res) => {
     let sum = 0;
     await Donation.aggregate([
         { $match: { donationTo: req.params.id } },
-        { $group: { _id : req.params.id, sum : { $sum: "$amount" } } }])
-        .then((res)=>{
+        { $group: { _id: req.params.id, sum: { $sum: "$amount" } } }])
+        .then((res) => {
             console.log(res);
             sum = res[0].sum;
-    });
+        });
     await Donation.find({ donationTo: req.params.id }).then(result => {
-        res.send({result,sum})
+        res.send({ result, sum })
     }).catch((err) => {
         res.send(err);
     })
