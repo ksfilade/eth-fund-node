@@ -52,7 +52,7 @@ router.get('/fundrisers', async (req, res) => {
         .sort({ _id: -1 })
         .skip(parseInt(req.query.skip))
         let finalRes = []
-        await results.forEach(async(el,index,arr) =>{
+        results.forEach(async(el,index,arr) =>{
             let balance = await  Donation.aggregate([
                 { $match: { donationTo: el._id.toString() } },
                 { $group: { _id : el._id.toString(), sum : { $sum: "$amount" } } }])
@@ -61,6 +61,8 @@ router.get('/fundrisers', async (req, res) => {
             });
             finalRes.push( { data:arr[index], balance: balance } )
             console.log(finalRes.balance);
+        }).then(() =>{
+            res.send({ finalRes });
         })
         console.log('object');
     res.send({ finalRes });
