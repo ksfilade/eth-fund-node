@@ -51,7 +51,7 @@ router.get('/fundrisers', async (req, res) => {
         .limit(parseInt(req.query.limit))
         .sort({ _id: -1 })
         .skip(parseInt(req.query.skip))
-
+        let finalRes = []
         results.forEach(async(el,index,arr) =>{
             console.log('objec 1asdt');
             console.log(el._id);
@@ -65,11 +65,11 @@ router.get('/fundrisers', async (req, res) => {
             console.log(balance);
             console.log('elemnt');
             console.log(arr[index]);
-            arr[index] = {data:arr[index],balance: balance}
+            finalRes.push( { data:arr[index], balance: balance } )
             console.log('element balance');
             console.log(arr[index].balance);
         })
-    res.send({ results });
+    res.send({ finalRes });
 
 })
 router.get('/fundrisers/user/:id', userAuth, async (req, res) => {
