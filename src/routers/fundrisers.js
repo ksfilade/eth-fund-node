@@ -51,19 +51,20 @@ router.get('/fundrisers', async (req, res) => {
         .limit(parseInt(req.query.limit))
         .sort({ _id: -1 })
         .skip(parseInt(req.query.skip))
-        let finalRes = []
+
         results.forEach(async(el,index,arr) =>{
-            let balance = await  Donation.aggregate([
+           await  Donation.aggregate([
                 { $match: { donationTo: el._id.toString() } },
                 { $group: { _id : el._id.toString(), sum : { $sum: "$amount" } } }])
                 .then((res)=>{
-                    return res[0].sum
+                    console.log(res);
+                    arr[index] = { data:arr[index], balance:res[0].sum};
+                    console.log('balance');
+                    console.log(arr[index].balance);
             });
-            finalRes.push( { data:arr[index], balance: balance } )
-            console.log(finalRes.balance);
         })
         console.log('object');
-    res.send({ finalRes });
+    res.send({ results });
 
 })
 router.get('/fundrisers/user/:id', userAuth, async (req, res) => {
