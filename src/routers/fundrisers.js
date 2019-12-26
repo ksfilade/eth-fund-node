@@ -52,7 +52,7 @@ router.get('/fundrisers', async (req, res) => {
         .sort({ _id: -1 })
         .skip(parseInt(req.query.skip))
         let finalRes = []
-        results.forEach(async(el,index,arr) =>{
+        await results.forEach(async(el,index,arr) =>{
             console.log('objec 1asdt');
             console.log(el._id);
             let balance = await  Donation.aggregate([
