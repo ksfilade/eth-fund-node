@@ -1,6 +1,6 @@
 
 var Web3 = require('web3');
-var ROPSTEN_WSS = 'wss://ropsten.infura.io/ws';
+var ROPSTEN_WSS = 'wss://ropsten.infura.io/ws/v3/97f060b643be49159ce5e62bab0a113f';
 var provider = new Web3.providers.WebsocketProvider(ROPSTEN_WSS);
 var web3 = new Web3(provider);
 var Donation = require('../../models/donations')

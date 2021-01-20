@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken')
 const router = new express.Router()
 const Fundriser = require('../models/fundriser')
 const Donation = require('../models/donations')
-
+const Comments = require('../models/comments')
 const multer = require('multer')
 const upload = multer({
     limits: {
@@ -16,10 +16,11 @@ const upload = multer({
     },
 })
 router.post('/fundrisers', auth, upload.single('upload'), async (req, res) => {
+    console.log(req.body);
     let fundriser = new Fundriser(req.body)
     fundriser.dateCreated = (new Date()).toLocaleDateString();
     const token = req.header('token')
-    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    const decoded = jwt.verify(token, 'hello')
     fundriser.createdBy = decoded._id.toString()
     if (req.file)
         fundriser.thumbnail = req.file.buffer
@@ -44,6 +45,7 @@ router.post('/fundrisers/donation', async (req, res) => {
 
 })
 router.get('/fundrisers', async (req, res) => {
+    console.log('hereee ===== 1');
     let results = await Fundriser
         .find(req.query.featured ? { featured: req.query.featured } : void 0)
         .find(req.query.category ? { category: req.query.category } : void 0)
@@ -52,22 +54,14 @@ router.get('/fundrisers', async (req, res) => {
         .sort({ _id: -1 })
         .skip(parseInt(req.query.skip))
 
-    // results.forEach(async(el,index,arr) =>{
-    //    await  Donation.aggregate([
-    //         { $match: { donationTo: el._id.toString() } },
-    //         { $group: { _id : el._id.toString(), sum : { $sum: "$amount" } } }])
-    //         .then((res)=>{
-    //             console.log(res);
-    //             arr[index] = { data:arr[index], balance:res[0].sum};
-    //     });
-    // })
     let promise = async function (el) {
        
         let res = await Donation.aggregate([
             { $match: { donationTo: el._id.toString() } },
             { $group: { _id: el.toString(), sum: { $sum: "$amount" } } }])
         console.log(res);
-        return {data:el,balance:res[0].sum};
+        console.log('object 2');
+        return {data:el,balance:res.length > 0 ? res[0].sum : 0};
         }
     for(let i = 0;i < results.length;i++){
         results[i] = await promise(results[i])
@@ -79,9 +73,24 @@ router.get('/fundrisers', async (req, res) => {
     res.send({ results });
 
 })
-router.get('/fundrisers/user/:id', userAuth, async (req, res) => {
+router.get('/fundrisers/user/:id',userAuth, async (req, res) => {
     let results = await Fundriser
         .find({ createdBy: req.params.id })
+        // console.log(results);
+        let promise = async function (el) {
+       
+            let res = await Donation.aggregate([
+                { $match: { donationTo: el._id.toString() } },
+                { $group: { _id: el.toString(), sum: { $sum: "$amount" } } }])
+            console.log(res);
+            console.log('object 2');
+            return {data:el,balance:res.length > 0 ? res[0].sum : 0};
+            }
+            for(let i = 0;i < results.length;i++){
+                results[i] = await promise(results[i])
+            }
+       
+
     res.send({ results });
 
 })
@@ -145,4 +154,23 @@ router.get('/fundrisers/image/:id', async (req, res) => {
         res.send('error')
     }
 })
+router.get('/fundriser/comments', async (req, res) => {
+    console.log('object ==== 1234',req.query);
+    let results = await Comments
+        .find({ fundriserId: req.query.fundriserId})
+    
+    res.send({ results });
+
+})
+router.post('/fundriser/comments', async (req, res) => {
+    console.log('object comments',req.body);
+    let comments = new Comments(req.body)
+
+    comments.save().then(() =>{
+        res.send({ comments })
+    })
+    // res.send({ results });
+
+})
+
 module.exports = router

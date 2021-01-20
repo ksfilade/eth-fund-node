@@ -474,6 +474,20 @@ export class Channel {
   }
 
   /**
+   * Unsubscribes off of channel events
+   *
+   * Use the ref returned from a channel.on() to unsubscribe one
+   * handler, or pass nothing for the ref to unsubscribe all
+   * handlers for the given event.
+   *
+   * @example
+   * // Unsubscribe the do_stuff handler
+   * const ref1 = channel.on("event", do_stuff)
+   * channel.off("event", ref1)
+   *
+   * // Unsubscribe all handlers from event
+   * channel.off("event")
+   *
    * @param {string} event
    * @param {integer} ref
    */
@@ -489,6 +503,16 @@ export class Channel {
   canPush(){ return this.socket.isConnected() && this.isJoined() }
 
   /**
+   * Sends a message `event` to phoenix with the payload `payload`.
+   * Phoenix receives this in the `handle_in(event, payload, socket)`
+   * function. if phoenix replies or it times out (default 10000ms),
+   * then optionally the reply can be received.
+   *
+   * @example
+   * channel.push("event")
+   *   .receive("ok", payload => console.log("phoenix replied:", payload))
+   *   .receive("error", err => console.log("phoenix errored", err))
+   *   .receive("timeout", () => console.log("timed out pushing"))
    * @param {string} event
    * @param {Object} payload
    * @param {number} [timeout]
@@ -516,7 +540,7 @@ export class Channel {
    *
    * Triggers onClose() hooks
    *
-   * To receive leave acknowledgements, use the a `receive`
+   * To receive leave acknowledgements, use the `receive`
    * hook to bind to the server ack, ie:
    *
    * @example
@@ -584,16 +608,10 @@ export class Channel {
   /**
    * @private
    */
-  sendJoin(timeout){
+  rejoin(timeout = this.timeout){ if(this.isLeaving()){ return }
+    this.socket.leaveOpenTopic(this.topic)
     this.state = CHANNEL_STATES.joining
     this.joinPush.resend(timeout)
-  }
-
-  /**
-   * @private
-   */
-  rejoin(timeout = this.timeout){ if(this.isLeaving()){ return }
-    this.sendJoin(timeout)
   }
 
   /**
@@ -603,9 +621,10 @@ export class Channel {
     let handledPayload = this.onMessage(event, payload, ref, joinRef)
     if(payload && !handledPayload){ throw new Error("channel onMessage callbacks must return the payload, modified or unmodified") }
 
-    for (let i = 0; i < this.bindings.length; i++) {
-      const bind = this.bindings[i]
-      if(bind.event !== event){ continue }
+    let eventBindings = this.bindings.filter(bind => bind.event === event)
+
+    for (let i = 0; i < eventBindings.length; i++) {
+      let bind = eventBindings[i]
       bind.callback(handledPayload, ref, joinRef || this.joinRef())
     }
   }
@@ -748,7 +767,7 @@ export class Socket {
       this.decode = this.defaultDecoder
     }
     if(phxWindow && phxWindow.addEventListener){
-      phxWindow.addEventListener("beforeunload", e => {
+      phxWindow.addEventListener("unload", e => {
         if(this.conn){
           this.unloaded = true
           this.abnormalClose("unloaded")
@@ -905,7 +924,7 @@ export class Socket {
    * @private
    */
   onConnOpen(){
-    if (this.hasLogger()) this.log("transport", `connected to ${this.endPointURL()}`)
+    if(this.hasLogger()) this.log("transport", `connected to ${this.endPointURL()}`)
     this.unloaded = false
     this.closeWasClean = false
     this.flushSendBuffer()
@@ -925,12 +944,46 @@ export class Socket {
   }
 
   teardown(callback, code, reason){
-    if(this.conn){
-      this.conn.onclose = function(){} // noop
-      if(code){ this.conn.close(code, reason || "") } else { this.conn.close() }
-      this.conn = null
+    if (!this.conn) {
+      return callback && callback()
     }
-    callback && callback()
+
+    this.waitForBufferDone(() => {
+      if (this.conn) {
+        if(code){ this.conn.close(code, reason || "") } else { this.conn.close() }
+      }
+
+      this.waitForSocketClosed(() => {
+        if (this.conn) {
+          this.conn.onclose = function(){} // noop
+          this.conn = null
+        }
+
+        callback && callback()
+      })
+    })
+  }
+
+  waitForBufferDone(callback, tries = 1) {
+    if (tries === 5 || !this.conn || !this.conn.bufferedAmount) {
+      callback()
+      return
+    }
+
+    setTimeout(() => {
+      this.waitForBufferDone(callback, tries + 1)
+    }, 150 * tries)
+  }
+
+  waitForSocketClosed(callback, tries = 1) {
+    if (tries === 5 || !this.conn || this.conn.readyState === SOCKET_STATES.closed) {
+      callback()
+      return
+    }
+
+    setTimeout(() => {
+      this.waitForSocketClosed(callback, tries + 1)
+    }, 150 * tries)
   }
 
   onConnClose(event){
@@ -999,7 +1052,7 @@ export class Socket {
   off(refs) {
     for(let key in this.stateChangeCallbacks){
       this.stateChangeCallbacks[key] = this.stateChangeCallbacks[key].filter(([ref]) => {
-        return !refs.includes(ref)
+        return refs.indexOf(ref) === -1
       })
     }
   }
@@ -1044,7 +1097,8 @@ export class Socket {
     return this.ref.toString()
   }
 
-  sendHeartbeat(){ if(!this.isConnected()){ return }
+  sendHeartbeat(){
+    if(!this.isConnected()){ return }
     if(this.pendingHeartbeatRef){
       this.pendingHeartbeatRef = null
       if (this.hasLogger()) this.log("transport", "heartbeat timeout. Attempting to re-establish connection")
@@ -1085,6 +1139,14 @@ export class Socket {
         callback(msg)
       }
     })
+  }
+
+  leaveOpenTopic(topic){
+    let dupChannel = this.channels.find(c => c.topic === topic && (c.isJoined() || c.isJoining()))
+    if(dupChannel){
+      if(this.hasLogger()) this.log("transport", `leaving duplicate topic "${topic}"`)
+      dupChannel.leave()
+    }
   }
 }
 
@@ -1150,6 +1212,10 @@ export class LongPoll {
           this.onopen()
           this.poll()
           break
+        case 403:
+          this.onerror()
+          this.close()
+          break
         case 0:
         case 500:
           this.onerror()
@@ -1182,9 +1248,7 @@ export class Ajax {
       let req = new XDomainRequest() // IE8, IE9
       this.xdomainRequest(req, method, endPoint, body, timeout, ontimeout, callback)
     } else {
-      let req = global.XMLHttpRequest ?
-                  new global.XMLHttpRequest() : // IE7+, Firefox, Chrome, Opera, Safari
-                  new ActiveXObject("Microsoft.XMLHTTP") // IE6, IE5
+      let req = new global.XMLHttpRequest(); // IE7+, Firefox, Chrome, Opera, Safari
       this.xhrRequest(req, method, endPoint, accept, body, timeout, ontimeout, callback)
     }
   }
