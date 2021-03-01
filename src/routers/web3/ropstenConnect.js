@@ -20,26 +20,17 @@ provider.on('end', e => {
 const abi =  [{"constant":true,"inputs":[],"name":"message","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"fundAddress","type":"address"},{"name":"fromId","type":"string"},{"name":"toId","type":"string"}],"name":"send","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"inputs":[{"name":"initialMessage","type":"string"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_from","type":"address"},{"indexed":false,"name":"_value","type":"uint256"},{"indexed":true,"name":"_to","type":"address"},{"indexed":false,"name":"fromId","type":"string"},{"indexed":false,"name":"toId","type":"string"}],"name":"Deposit","type":"event"}]
 var myContract = new web3.eth.Contract(abi, '0xDAD225222C3D87d608e86BA73F92b919F57e0ED9');
 myContract.events.Deposit({
-    // filter: {myIndexedParam: [20,23]},
     fromBlock: 0,
     toBlock: 'latest'
 }).on('data', function(event) {
-    console.log(event.returnValues);
-
     let donation = new Donation();
     donation.donationFrom = event.returnValues._from
     donation.donationTo = event.returnValues._to
     const BN = web3.utils.BN
-    // web3.utils.fromWei(new BN(await web3.eth.getBalance(walletAddress)).toString())
     donation.amount = web3.utils.fromWei(new BN( event.returnValues._value ))
     donation.fromId = event.returnValues.fromId
     donation.toId = event.returnValues.toId
-
-    console.log('==============');
-    console.log(donation);
     donation.save().then(async () => {
-        // const token = await fundriser.generateAuthToken()
-        // res.send({ fundriser })
         console.log('successfull saved');
         }).catch((error) => {
         console.log(error);
